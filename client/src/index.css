@@ -3,13 +3,21 @@
 @tailwind utilities;
 
 @layer base {
-  * { box-sizing: border-box; }
-  html { -webkit-text-size-adjust: 100%; }
+  * {
+    box-sizing: border-box;
+  }
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
   body {
     @apply bg-stone-50 text-stone-900 font-sans antialiased;
     overscroll-behavior: none;
   }
-  h1, h2, h3 { @apply font-display; }
+  h1,
+  h2,
+  h3 {
+    @apply font-display;
+  }
 }
 
 @layer components {
