@@ -4,39 +4,45 @@
 
 @layer base {
   * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
   body {
     @apply bg-stone-50 text-stone-900 font-sans antialiased;
+    overscroll-behavior: none;
   }
   h1, h2, h3 { @apply font-display; }
 }
 
 @layer components {
   .btn-primary {
-    @apply bg-amber-500 hover:bg-amber-600 text-white font-medium px-4 py-2 rounded-lg text-sm transition-colors;
+    @apply bg-amber-500 hover:bg-amber-600 active:scale-95 text-white font-medium px-4 py-2.5 rounded-xl text-sm transition-all touch-manipulation;
   }
   .btn-ghost {
-    @apply border border-stone-200 hover:bg-stone-100 text-stone-700 font-medium px-4 py-2 rounded-lg text-sm transition-colors;
+    @apply border border-stone-200 hover:bg-stone-100 active:scale-95 text-stone-700 font-medium px-4 py-2.5 rounded-xl text-sm transition-all touch-manipulation;
   }
   .card {
-    @apply bg-white border border-stone-200 rounded-xl p-5;
+    @apply bg-white border border-stone-200 rounded-2xl p-4 md:p-5;
   }
   .input {
-    @apply w-full border border-stone-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 bg-white;
+    @apply w-full border border-stone-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 bg-white;
+    min-height: 44px;
   }
   .label {
-    @apply block text-xs font-medium text-stone-500 mb-1;
+    @apply block text-xs font-medium text-stone-500 mb-1.5;
   }
   .chip {
-    @apply px-3 py-1 rounded-full text-xs border border-stone-200 text-stone-600 cursor-pointer hover:border-amber-400 hover:text-amber-600 transition-colors;
+    @apply px-3 py-2 rounded-xl text-xs border border-stone-200 text-stone-600 cursor-pointer hover:border-amber-400 hover:text-amber-600 transition-colors touch-manipulation;
+    min-height: 36px;
+    display: inline-flex;
+    align-items: center;
   }
   .chip-active {
     @apply bg-amber-500 border-amber-500 text-white;
   }
   .stat-card {
-    @apply bg-stone-50 border border-stone-100 rounded-xl p-4;
+    @apply bg-stone-50 border border-stone-100 rounded-2xl p-4;
   }
   .nav-item {
-    @apply flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm text-stone-500 hover:text-stone-900 hover:bg-stone-100 transition-colors cursor-pointer;
+    @apply flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-stone-500 hover:text-stone-900 hover:bg-stone-100 transition-colors cursor-pointer touch-manipulation;
   }
   .nav-item-active {
     @apply bg-amber-50 text-amber-700 font-medium;
@@ -48,6 +54,23 @@
     @apply h-1.5 bg-stone-100 rounded-full overflow-hidden;
   }
   .progress-fill {
-    @apply h-full bg-amber-500 rounded-full transition-all;
+    @apply h-full bg-amber-500 rounded-full transition-all duration-500;
+  }
+  .bottom-nav-item {
+    @apply flex flex-col items-center gap-0.5 py-2 px-3 rounded-xl text-stone-400 transition-colors touch-manipulation cursor-pointer;
+    min-width: 56px;
+  }
+  .bottom-nav-item.active {
+    @apply text-amber-600;
+  }
+  .page-container {
+    @apply px-4 py-5 md:px-8 md:py-8;
+    padding-bottom: 88px;
+    max-width: 1024px;
+  }
+  @media (min-width: 768px) {
+    .page-container {
+      padding-bottom: 2rem;
+    }
   }
 }
