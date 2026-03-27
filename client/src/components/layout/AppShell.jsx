@@ -11,30 +11,32 @@ const NAV = [
   { to: "/stats", label: "Stats", icon: "📈" },
 ];
 
+const sidebarInner = {
+  width: 210,
+  flexShrink: 0,
+  background: "#111",
+  borderRight: "1px solid #1e1e1e",
+  flexDirection: "column", // no display here — Tailwind controls that
+  height: "100%",
+};
+
 export default function AppShell() {
   const { logout } = useAuth();
   const [showLog, setShowLog] = useState(false);
 
   return (
     <div
-      style={{
-        display: "flex",
-        height: "100vh",
-        background: "#0f0f0f",
-        overflow: "hidden",
-      }}
+      className="flex h-screen overflow-hidden"
+      style={{ background: "#0f0f0f" }}
     >
-      {/* Sidebar — desktop only */}
+      {/* Sidebar — lg+ only. NO inline display property. */}
       <aside
+        className="hidden lg:flex flex-col flex-shrink-0"
         style={{
           width: 210,
-          flexShrink: 0,
           background: "#111",
           borderRight: "1px solid #1e1e1e",
-          display: "flex",
-          flexDirection: "column",
         }}
-        className="hidden lg:flex"
       >
         <div
           style={{
@@ -60,14 +62,8 @@ export default function AppShell() {
         </div>
 
         <nav
-          style={{
-            flex: 1,
-            padding: "12px 10px",
-            overflowY: "auto",
-            display: "flex",
-            flexDirection: "column",
-            gap: 2,
-          }}
+          className="flex flex-col flex-1 overflow-y-auto"
+          style={{ padding: "12px 10px", gap: 2 }}
         >
           {NAV.map(({ to, label, icon }) => (
             <NavLink
@@ -87,11 +83,10 @@ export default function AppShell() {
         </nav>
 
         <div
+          className="flex flex-col"
           style={{
             padding: "12px 10px",
             borderTop: "1px solid #1e1e1e",
-            display: "flex",
-            flexDirection: "column",
             gap: 8,
           }}
         >
@@ -111,7 +106,6 @@ export default function AppShell() {
               border: "none",
               cursor: "pointer",
               padding: "4px 0",
-              transition: "color 0.15s",
             }}
             onMouseEnter={(e) => (e.target.style.color = "#888")}
             onMouseLeave={(e) => (e.target.style.color = "#444")}
@@ -121,9 +115,9 @@ export default function AppShell() {
         </div>
       </aside>
 
-      {/* Main */}
-      <main style={{ flex: 1, overflowY: "auto", overflowX: "hidden" }}>
-        {/* Mobile topbar */}
+      {/* Main content */}
+      <main className="flex-1 overflow-y-auto overflow-x-hidden">
+        {/* Mobile topbar — below lg only. NO inline display property. */}
         <div
           className="flex lg:hidden items-center justify-between"
           style={{
@@ -158,7 +152,7 @@ export default function AppShell() {
         <Outlet context={{ openLogSession: () => setShowLog(true) }} />
       </main>
 
-      {/* Bottom nav — mobile only */}
+      {/* Bottom nav — below lg only. NO inline display property. */}
       <nav
         className="flex lg:hidden items-center justify-around"
         style={{
@@ -169,7 +163,10 @@ export default function AppShell() {
           zIndex: 20,
           background: "#111",
           borderTop: "1px solid #1e1e1e",
-          padding: `8px 8px max(8px, env(safe-area-inset-bottom))`,
+          paddingTop: 8,
+          paddingLeft: 8,
+          paddingRight: 8,
+          paddingBottom: "max(8px, env(safe-area-inset-bottom))",
         }}
       >
         {NAV.map(({ to, label, icon }) => (
