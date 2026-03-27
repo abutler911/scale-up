@@ -11,65 +11,156 @@ import SessionDetailModal from "../components/sessions/SessionDetailModal.jsx";
 
 function Heatmap({ data }) {
   const year = new Date().getFullYear();
-  const start = new Date(`${year}-01-01`);
-  const startDay = start.getDay();
-  const cells = [];
-  for (let i = 0; i < startDay; i++) cells.push(null);
-  const today = new Date().toISOString().split("T")[0];
-  let d = new Date(start);
+  const MONTHS = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  ];
+  const CELL = 13;
+
+  // Build date list using local time throughout
+  const localDateStr = (d) => {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${y}-${m}-${day}`;
+  };
+
+  const todayStr = localDateStr(new Date());
+  const start = new Date(year, 0, 1); // Jan 1 local time
+  const startDay = start.getDay(); // 0=Sun
+
+  // Build weeks: each week is [Sun..Sat], null = padding
+  const weeks = [];
+  let week = Array(startDay).fill(null);
+  let d = new Date(year, 0, 1);
   while (d.getFullYear() === year) {
-    cells.push(d.toISOString().split("T")[0]);
+    week.push(localDateStr(d));
+    if (week.length === 7) {
+      weeks.push(week);
+      week = [];
+    }
     d.setDate(d.getDate() + 1);
   }
+  if (week.length) {
+    while (week.length < 7) week.push(null);
+    weeks.push(week);
+  }
+
+  // Month label positions
+  const monthLabels = [];
+  weeks.forEach((w, wi) => {
+    const firstDate = w.find(Boolean);
+    if (firstDate) {
+      const month = parseInt(firstDate.split("-")[1]) - 1;
+      const day = parseInt(firstDate.split("-")[2]);
+      if (day <= 7 && !monthLabels.find((l) => l.month === month)) {
+        monthLabels.push({ month, wi });
+      }
+    }
+  });
+
   const getLevel = (mins) => {
-    if (!mins) return 0;
+    if (!mins || mins === 0) return 0;
     if (mins < 20) return 1;
     if (mins < 45) return 2;
     if (mins < 75) return 3;
     return 4;
   };
-  const colors = ["#f5f5f4", "#FAEEDA", "#FAC775", "#EF9F27", "#BA7517"];
-  const weeks = [];
-  for (let i = 0; i < cells.length; i += 7) weeks.push(cells.slice(i, i + 7));
+  const colors = ["transparent", "#FAEEDA", "#FAC775", "#EF9F27", "#BA7517"];
+  const totalWidth = weeks.length * (CELL + 2);
+
   return (
-    <div className="overflow-x-auto -mx-1 px-1">
-      <div
-        className="flex gap-1"
-        style={{ minWidth: `${weeks.length * 15}px` }}
-      >
-        {weeks.map((week, wi) => (
-          <div key={wi} className="flex flex-col gap-1">
-            {week.map((date, di) => (
+    <div className="overflow-x-auto">
+      <div style={{ minWidth: totalWidth, position: "relative" }}>
+        {/* Month labels */}
+        <div className="flex mb-1" style={{ paddingLeft: 0 }}>
+          {weeks.map((_, wi) => {
+            const label = monthLabels.find((l) => l.wi === wi);
+            return (
+              <div key={wi} style={{ width: CELL + 2, flexShrink: 0 }}>
+                {label && (
+                  <span
+                    style={{
+                      fontSize: 10,
+                      color: "#a8a29e",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {MONTHS[label.month]}
+                  </span>
+                )}
+              </div>
+            );
+          })}
+        </div>
+        {/* Grid */}
+        <div className="flex gap-0.5">
+          {weeks.map((week, wi) => (
+            <div key={wi} className="flex flex-col gap-0.5">
+              {week.map((date, di) => {
+                const mins = date ? data[date] || 0 : 0;
+                const level = date ? getLevel(mins) : -1;
+                const isToday = date === todayStr;
+                const isPast = date && date <= todayStr;
+                return (
+                  <div
+                    key={di}
+                    title={
+                      date
+                        ? mins
+                          ? `${date}: ${mins} min`
+                          : `${date}: no practice`
+                        : ""
+                    }
+                    style={{
+                      width: CELL,
+                      height: CELL,
+                      borderRadius: 3,
+                      background:
+                        level === 0 && isPast
+                          ? "#f0efed"
+                          : level === 0
+                            ? "transparent"
+                            : colors[level],
+                      border: isToday
+                        ? "2px solid #BA7517"
+                        : "1px solid transparent",
+                      boxSizing: "border-box",
+                    }}
+                  />
+                );
+              })}
+            </div>
+          ))}
+        </div>
+        {/* Legend */}
+        <div className="flex items-center gap-1.5 mt-3">
+          <span style={{ fontSize: 10, color: "#a8a29e" }}>Less</span>
+          {["#f0efed", "#FAEEDA", "#FAC775", "#EF9F27", "#BA7517"].map(
+            (c, i) => (
               <div
-                key={di}
-                title={
-                  date
-                    ? `${date}: ${data[date] ? `${data[date]} min` : "no practice"}`
-                    : ""
-                }
+                key={i}
                 style={{
-                  width: 11,
-                  height: 11,
+                  width: 10,
+                  height: 10,
                   borderRadius: 2,
-                  background: date
-                    ? colors[getLevel(data[date])]
-                    : "transparent",
-                  border: date === today ? "1.5px solid #BA7517" : "none",
+                  background: c,
                 }}
               />
-            ))}
-          </div>
-        ))}
-      </div>
-      <div className="flex items-center gap-1.5 mt-2">
-        <span className="text-xs text-stone-400">Less</span>
-        {colors.map((c, i) => (
-          <div
-            key={i}
-            style={{ width: 10, height: 10, borderRadius: 2, background: c }}
-          />
-        ))}
-        <span className="text-xs text-stone-400">More</span>
+            ),
+          )}
+          <span style={{ fontSize: 10, color: "#a8a29e" }}>More</span>
+        </div>
       </div>
     </div>
   );
