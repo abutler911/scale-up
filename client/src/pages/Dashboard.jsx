@@ -1,12 +1,11 @@
 import { useEffect, useState } from "react";
-import { useOutletContext } from "react-router-dom";
+import { useOutletContext, Link } from "react-router-dom";
 import { statsApi, sessionsApi, goalsApi } from "../api/resources.js";
 import {
   formatDuration,
   formatDate,
   FEEL_EMOJI,
   PRACTICE_LABELS,
-  pct,
 } from "../utils/index.js";
 import {
   BarChart,
@@ -17,6 +16,23 @@ import {
   ResponsiveContainer,
   Cell,
 } from "recharts";
+
+const TYPE_EMOJI = {
+  streak_days: "🔥",
+  days_per_week: "📅",
+  minutes_per_day: "⏱",
+  total_minutes: "⏳",
+  session_count: "📋",
+  bpm_target: "🎵",
+  custom: "✏️",
+};
+
+function progressColor(p) {
+  if (p >= 100) return "#639922";
+  if (p >= 66) return "#BA7517";
+  if (p >= 33) return "#EF9F27";
+  return "#d6d3d1";
+}
 
 export default function Dashboard() {
   const { openLogSession } = useOutletContext();
@@ -56,10 +72,10 @@ export default function Dashboard() {
     month: "long",
     day: "numeric",
   });
+  const activeGoals = goals.slice(0, 4);
 
   return (
     <div className="page-container space-y-4">
-      {/* Header */}
       <div className="flex items-start justify-between">
         <div>
           <h1 className="font-display text-2xl text-stone-900">Dashboard</h1>
@@ -73,7 +89,7 @@ export default function Dashboard() {
         </button>
       </div>
 
-      {/* Stats grid — 2 col on mobile, 4 on desktop */}
+      {/* Stats — 2 col mobile, 4 desktop */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <div className="stat-card">
           <p className="text-xs text-stone-400 uppercase tracking-wide mb-1">
@@ -120,83 +136,123 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Chart + Goals — stack on mobile, side by side on desktop */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="card">
-          <h3 className="text-sm font-medium text-stone-700 mb-3">
-            Last 7 weeks
-          </h3>
-          <ResponsiveContainer width="100%" height={120}>
-            <BarChart data={recentWeeks} barSize={18}>
-              <XAxis
-                dataKey="label"
-                tick={{ fontSize: 10, fill: "#a8a29e" }}
-                axisLine={false}
-                tickLine={false}
-              />
-              <YAxis hide />
-              <Tooltip
-                formatter={(v) => [`${v} min`, "Practice"]}
-                contentStyle={{
-                  fontSize: 12,
-                  borderRadius: 8,
-                  border: "1px solid #e7e5e4",
-                }}
-              />
-              <Bar dataKey="minutes" radius={[4, 4, 0, 0]}>
-                {recentWeeks.map((_, i) => (
-                  <Cell
-                    key={i}
-                    fill={i === recentWeeks.length - 1 ? "#BA7517" : "#e7e5e4"}
-                  />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
+      {/* Goals — prominent section */}
+      <div className="card">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-sm font-medium text-stone-700">Active goals</h3>
+          <Link to="/goals" className="text-xs text-amber-600 hover:underline">
+            View all →
+          </Link>
         </div>
-
-        <div className="card">
-          <h3 className="text-sm font-medium text-stone-700 mb-3">
-            Active goals
-          </h3>
-          {goals.length === 0 ? (
-            <p className="text-stone-400 text-sm">No active goals yet.</p>
-          ) : (
-            <div className="space-y-3">
-              {goals.slice(0, 3).map((g) => (
+        {activeGoals.length === 0 ? (
+          <div className="text-center py-4">
+            <p className="text-stone-400 text-sm mb-2">No active goals</p>
+            <Link
+              to="/goals"
+              className="text-xs text-amber-600 hover:underline"
+            >
+              Set a goal →
+            </Link>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {activeGoals.map((g) => {
+              const current = g.computed_current ?? g.current_value ?? 0;
+              const target = g.computed_target ?? g.target_value ?? 1;
+              const p = Math.min(100, Math.round((current / target) * 100));
+              return (
                 <div key={g.id}>
-                  <div className="flex justify-between text-xs mb-1">
-                    <span className="text-stone-700 truncate pr-2">
-                      {g.title}
-                    </span>
-                    <span className="text-stone-400 flex-shrink-0">
-                      {pct(g.current_value, g.target_value)}%
-                    </span>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <span className="text-sm flex-shrink-0">
+                        {TYPE_EMOJI[g.type] || "🎯"}
+                      </span>
+                      <span className="text-sm text-stone-700 truncate">
+                        {g.title}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 flex-shrink-0 ml-2">
+                      <span className="text-xs text-stone-400">
+                        {current}/{target}
+                      </span>
+                      <span
+                        className="text-xs font-medium"
+                        style={{ color: progressColor(p) }}
+                      >
+                        {p}%
+                      </span>
+                    </div>
                   </div>
-                  <div className="progress-bar">
+                  <div className="h-2 bg-stone-100 rounded-full overflow-hidden">
                     <div
-                      className="progress-fill"
-                      style={{
-                        width: `${pct(g.current_value, g.target_value)}%`,
-                      }}
+                      className="h-full rounded-full transition-all duration-700"
+                      style={{ width: `${p}%`, background: progressColor(p) }}
                     />
                   </div>
                 </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* Chart */}
+      <div className="card">
+        <h3 className="text-sm font-medium text-stone-700 mb-3">
+          Last 7 weeks
+        </h3>
+        <ResponsiveContainer width="100%" height={120}>
+          <BarChart data={recentWeeks} barSize={18}>
+            <XAxis
+              dataKey="label"
+              tick={{ fontSize: 10, fill: "#a8a29e" }}
+              axisLine={false}
+              tickLine={false}
+            />
+            <YAxis hide />
+            <Tooltip
+              formatter={(v) => [`${v} min`, "Practice"]}
+              contentStyle={{
+                fontSize: 12,
+                borderRadius: 8,
+                border: "1px solid #e7e5e4",
+              }}
+            />
+            <Bar dataKey="minutes" radius={[4, 4, 0, 0]}>
+              {recentWeeks.map((_, i) => (
+                <Cell
+                  key={i}
+                  fill={i === recentWeeks.length - 1 ? "#BA7517" : "#e7e5e4"}
+                />
               ))}
-            </div>
-          )}
-        </div>
+            </Bar>
+          </BarChart>
+        </ResponsiveContainer>
       </div>
 
       {/* Recent sessions */}
       <div className="card">
-        <h3 className="text-sm font-medium text-stone-700 mb-3">
-          Recent sessions
-        </h3>
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-sm font-medium text-stone-700">
+            Recent sessions
+          </h3>
+          <Link
+            to="/sessions"
+            className="text-xs text-amber-600 hover:underline"
+          >
+            View all →
+          </Link>
+        </div>
         {sessions.length === 0 ? (
-          <p className="text-stone-400 text-sm">
-            No sessions yet. Log your first one!
-          </p>
+          <div className="text-center py-4">
+            <p className="text-stone-400 text-sm mb-2">No sessions yet</p>
+            <button
+              onClick={openLogSession}
+              className="text-xs text-amber-600 hover:underline"
+            >
+              Log your first session →
+            </button>
+          </div>
         ) : (
           <div className="divide-y divide-stone-100">
             {sessions.map((s) => (
@@ -222,17 +278,12 @@ export default function Dashboard() {
                     {formatDate(s.date)}
                   </p>
                   <div className="flex flex-wrap gap-1 mt-1">
-                    {(s.practice_types || []).map((t) => (
+                    {(s.practice_types || []).slice(0, 3).map((t) => (
                       <span key={t} className="tag">
                         {PRACTICE_LABELS[t] || t}
                       </span>
                     ))}
                   </div>
-                  {s.notes && (
-                    <p className="text-xs text-stone-500 mt-1 line-clamp-1">
-                      {s.notes}
-                    </p>
-                  )}
                 </div>
               </div>
             ))}
