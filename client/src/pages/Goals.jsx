@@ -73,10 +73,10 @@ const GOAL_TYPES = [
 const TYPE_MAP = Object.fromEntries(GOAL_TYPES.map((t) => [t.value, t]));
 
 function progressColor(p) {
-  if (p >= 100) return "#639922";
-  if (p >= 66) return "#BA7517";
-  if (p >= 33) return "#EF9F27";
-  return "#e7e5e4";
+  if (p >= 100) return "#22D3EE";
+  if (p >= 66) return "#38BDF8";
+  if (p >= 33) return "#0EA5E9";
+  return "#1e3a4a";
 }
 
 function GoalCard({ goal, onEdit, onComplete, onDelete }) {
@@ -96,7 +96,16 @@ function GoalCard({ goal, onEdit, onComplete, onDelete }) {
             <span className="text-base">{typeInfo?.label.split(" ")[0]}</span>
             <h3 className="text-sm font-medium text-stone-800">{goal.title}</h3>
             {isDone && (
-              <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">
+              <span
+                style={{
+                  fontSize: 11,
+                  background: "rgba(34,211,238,0.12)",
+                  color: "#22D3EE",
+                  padding: "2px 8px",
+                  borderRadius: 20,
+                  fontWeight: 500,
+                }}
+              >
                 Complete!
               </span>
             )}

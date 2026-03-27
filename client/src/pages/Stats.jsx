@@ -14,16 +14,16 @@ import {
 } from "recharts";
 
 const COLORS = [
-  "#BA7517",
-  "#EF9F27",
-  "#FAC775",
-  "#378ADD",
-  "#639922",
-  "#D4537E",
-  "#534AB7",
-  "#1D9E75",
-  "#D85A30",
-  "#888780",
+  "#38BDF8",
+  "#7DD3FC",
+  "#0EA5E9",
+  "#06B6D4",
+  "#22D3EE",
+  "#67E8F9",
+  "#A5F3FC",
+  "#0284C7",
+  "#0369A1",
+  "#075985",
 ];
 
 export default function Stats() {
@@ -76,7 +76,7 @@ export default function Stats() {
           <p className="text-xs text-stone-400 uppercase tracking-wide mb-1">
             This month
           </p>
-          <p className="text-2xl font-medium text-amber-500">
+          <p style={{ fontSize: 22, fontWeight: 500, color: "#38BDF8" }}>
             {summary?.thisMonthHours ?? 0}
             <span className="text-sm ml-1">hrs</span>
           </p>
@@ -97,7 +97,7 @@ export default function Stats() {
           <p className="text-xs text-stone-400 uppercase tracking-wide mb-1">
             Best streak
           </p>
-          <p className="text-2xl font-medium text-amber-500">
+          <p style={{ fontSize: 22, fontWeight: 500, color: "#38BDF8" }}>
             {streak?.longestStreak ?? 0}
             <span className="text-sm ml-1">days</span>
           </p>
@@ -125,10 +125,12 @@ export default function Stats() {
               contentStyle={{
                 fontSize: 12,
                 borderRadius: 8,
-                border: "1px solid #e7e5e4",
+                border: "1px solid #2e2e2e",
+                background: "#1a1a1a",
+                color: "#f0f0f0",
               }}
             />
-            <Bar dataKey="minutes" fill="#EF9F27" radius={[4, 4, 0, 0]} />
+            <Bar dataKey="minutes" fill="#38BDF8" radius={[4, 4, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </div>
@@ -163,7 +165,9 @@ export default function Stats() {
                     contentStyle={{
                       fontSize: 12,
                       borderRadius: 8,
-                      border: "1px solid #e7e5e4",
+                      border: "1px solid #2e2e2e",
+                      background: "#1a1a1a",
+                      color: "#f0f0f0",
                     }}
                   />
                 </PieChart>

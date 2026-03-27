@@ -1,191 +1,454 @@
 import { useEffect, useState } from "react";
-import { sessionsApi, piecesApi, statsApi } from "../api/resources.js";
-import {
-  formatDuration,
-  formatDate,
-  FEEL_EMOJI,
-  PRACTICE_LABELS,
-  PRACTICE_TYPES,
-} from "../utils/index.js";
-import SessionDetailModal from "../components/sessions/SessionDetailModal.jsx";
+import { goalsApi, piecesApi } from "../api/resources.js";
+import { formatDate, pct } from "../utils/index.js";
 
-function Heatmap({ data }) {
-  const year = new Date().getFullYear();
-  const MONTHS = [
-    "Jan",
-    "Feb",
-    "Mar",
-    "Apr",
-    "May",
-    "Jun",
-    "Jul",
-    "Aug",
-    "Sep",
-    "Oct",
-    "Nov",
-    "Dec",
-  ];
-  const CELL = 13;
+const GOAL_TYPES = [
+  {
+    value: "streak_days",
+    label: "🔥 Daily streak",
+    description: "Practice N days in a row",
+    fields: ["target_value"],
+    targetLabel: "Days in a row",
+    targetPlaceholder: "30",
+    unit: "days",
+  },
+  {
+    value: "days_per_week",
+    label: "📅 Days per week",
+    description: "Practice at least X days every week",
+    fields: ["target_value"],
+    targetLabel: "Days per week",
+    targetPlaceholder: "3",
+    unit: "days/week",
+  },
+  {
+    value: "minutes_per_day",
+    label: "⏱ Minutes per day",
+    description: "Hit a daily minute target for N days",
+    fields: ["target_value", "secondary_value"],
+    targetLabel: "Minutes per day",
+    targetPlaceholder: "15",
+    secondaryLabel: "For how many days",
+    secondaryPlaceholder: "10",
+    unit: "min/day",
+  },
+  {
+    value: "total_minutes",
+    label: "⏳ Total minutes",
+    description: "Accumulate X minutes of practice",
+    fields: ["target_value", "deadline"],
+    targetLabel: "Total minutes",
+    targetPlaceholder: "600",
+    unit: "minutes",
+  },
+  {
+    value: "session_count",
+    label: "📋 Session count",
+    description: "Complete N practice sessions",
+    fields: ["target_value", "deadline"],
+    targetLabel: "Number of sessions",
+    targetPlaceholder: "20",
+    unit: "sessions",
+  },
+  {
+    value: "bpm_target",
+    label: "🎵 BPM target",
+    description: "Reach a target tempo on a piece",
+    fields: ["target_value", "piece_id"],
+    targetLabel: "Target BPM",
+    targetPlaceholder: "120",
+    unit: "BPM",
+  },
+  {
+    value: "custom",
+    label: "✏️ Custom",
+    description: "Set any goal and track it manually",
+    fields: ["target_value", "unit"],
+    targetLabel: "Target value",
+    targetPlaceholder: "100",
+    unit: "",
+  },
+];
 
-  // Build date list using local time throughout
-  const localDateStr = (d) => {
-    const y = d.getFullYear();
-    const m = String(d.getMonth() + 1).padStart(2, "0");
-    const day = String(d.getDate()).padStart(2, "0");
-    return `${y}-${m}-${day}`;
-  };
+const TYPE_MAP = Object.fromEntries(GOAL_TYPES.map((t) => [t.value, t]));
 
-  const todayStr = localDateStr(new Date());
-  const start = new Date(year, 0, 1); // Jan 1 local time
-  const startDay = start.getDay(); // 0=Sun
+function progressColor(p) {
+  if (p >= 100) return "#22D3EE";
+  if (p >= 66) return "#38BDF8";
+  if (p >= 33) return "#0EA5E9";
+  return "#1e3a4a";
+}
 
-  // Build weeks: each week is [Sun..Sat], null = padding
-  const weeks = [];
-  let week = Array(startDay).fill(null);
-  let d = new Date(year, 0, 1);
-  while (d.getFullYear() === year) {
-    week.push(localDateStr(d));
-    if (week.length === 7) {
-      weeks.push(week);
-      week = [];
-    }
-    d.setDate(d.getDate() + 1);
-  }
-  if (week.length) {
-    while (week.length < 7) week.push(null);
-    weeks.push(week);
-  }
-
-  // Month label positions
-  const monthLabels = [];
-  weeks.forEach((w, wi) => {
-    const firstDate = w.find(Boolean);
-    if (firstDate) {
-      const month = parseInt(firstDate.split("-")[1]) - 1;
-      const day = parseInt(firstDate.split("-")[2]);
-      if (day <= 7 && !monthLabels.find((l) => l.month === month)) {
-        monthLabels.push({ month, wi });
-      }
-    }
-  });
-
-  const getLevel = (mins) => {
-    if (!mins || mins === 0) return 0;
-    if (mins < 20) return 1;
-    if (mins < 45) return 2;
-    if (mins < 75) return 3;
-    return 4;
-  };
-  const colors = ["transparent", "#FAEEDA", "#FAC775", "#EF9F27", "#BA7517"];
-  const totalWidth = weeks.length * (CELL + 2);
+function GoalCard({ goal, onEdit, onComplete, onDelete }) {
+  const current = goal.computed_current ?? goal.current_value ?? 0;
+  const target = goal.computed_target ?? goal.target_value ?? 1;
+  const p = Math.min(100, Math.round((current / target) * 100));
+  const typeInfo = TYPE_MAP[goal.type];
+  const isDone = p >= 100;
 
   return (
-    <div className="overflow-x-auto">
-      <div style={{ minWidth: totalWidth, position: "relative" }}>
-        {/* Month labels */}
-        <div className="flex mb-1" style={{ paddingLeft: 0 }}>
-          {weeks.map((_, wi) => {
-            const label = monthLabels.find((l) => l.wi === wi);
-            return (
-              <div key={wi} style={{ width: CELL + 2, flexShrink: 0 }}>
-                {label && (
-                  <span
-                    style={{
-                      fontSize: 10,
-                      color: "#a8a29e",
-                      whiteSpace: "nowrap",
-                    }}
+    <div
+      className={`card group transition-all ${isDone ? "border-green-200 bg-green-50/30" : ""}`}
+    >
+      <div className="flex items-start justify-between gap-2">
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-base">{typeInfo?.label.split(" ")[0]}</span>
+            <h3 className="text-sm font-medium text-stone-800">{goal.title}</h3>
+            {isDone && (
+              <span
+                style={{
+                  fontSize: 11,
+                  background: "rgba(34,211,238,0.12)",
+                  color: "#22D3EE",
+                  padding: "2px 8px",
+                  borderRadius: 20,
+                  fontWeight: 500,
+                }}
+              >
+                Complete!
+              </span>
+            )}
+          </div>
+          {goal.description && (
+            <p className="text-xs text-stone-400 mt-0.5">{goal.description}</p>
+          )}
+        </div>
+        <div className="flex gap-3 flex-shrink-0 opacity-50 group-hover:opacity-100 transition-opacity">
+          <button
+            onClick={onEdit}
+            className="text-stone-400 hover:text-stone-700 text-sm touch-manipulation p-1"
+          >
+            ✏
+          </button>
+          {!isDone && (
+            <button
+              onClick={onComplete}
+              className="text-stone-400 hover:text-green-600 text-sm touch-manipulation p-1"
+            >
+              ✓
+            </button>
+          )}
+          <button
+            onClick={onDelete}
+            className="text-stone-400 hover:text-red-500 text-sm touch-manipulation p-1"
+          >
+            ✕
+          </button>
+        </div>
+      </div>
+
+      {/* Progress bar */}
+      <div className="mt-3 mb-2">
+        <div className="flex justify-between text-xs mb-1.5">
+          <span className="text-stone-500 font-medium">
+            {current} / {target} {goal.unit || typeInfo?.unit || ""}
+          </span>
+          <span className="font-medium" style={{ color: progressColor(p) }}>
+            {p}%
+          </span>
+        </div>
+        <div className="h-2.5 bg-stone-100 rounded-full overflow-hidden">
+          <div
+            className="h-full rounded-full transition-all duration-700"
+            style={{ width: `${p}%`, background: progressColor(p) }}
+          />
+        </div>
+      </div>
+
+      {goal.progress_label && (
+        <p className="text-xs text-stone-400 mt-1">{goal.progress_label}</p>
+      )}
+
+      <div className="flex items-center gap-3 mt-2">
+        {goal.deadline && (
+          <span className="text-xs text-stone-300">
+            Due {formatDate(goal.deadline)}
+          </span>
+        )}
+        {goal.start_date && (
+          <span className="text-xs text-stone-300">
+            Started {formatDate(goal.start_date)}
+          </span>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function GoalModal({ goal, pieces, onClose, onSaved }) {
+  const [selectedType, setSelectedType] = useState(goal?.type || null);
+  const [form, setForm] = useState(
+    goal
+      ? {
+          title: goal.title,
+          description: goal.description || "",
+          type: goal.type,
+          target_value: goal.target_value || "",
+          secondary_value: goal.secondary_value || "",
+          unit: goal.unit || "",
+          piece_id: goal.piece_id || "",
+          deadline: goal.deadline || "",
+          start_date: goal.start_date || "",
+        }
+      : {
+          title: "",
+          description: "",
+          type: "",
+          target_value: "",
+          secondary_value: "",
+          unit: "",
+          piece_id: "",
+          deadline: "",
+          start_date: new Date().toISOString().split("T")[0],
+        },
+  );
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+
+  const typeInfo = selectedType ? TYPE_MAP[selectedType] : null;
+
+  const selectType = (type) => {
+    const t = TYPE_MAP[type];
+    setSelectedType(type);
+    setForm((f) => ({ ...f, type, unit: t?.unit || "" }));
+  };
+
+  const handleSave = async () => {
+    if (!form.title) {
+      setError("Title is required");
+      return;
+    }
+    if (!form.type) {
+      setError("Please select a goal type");
+      return;
+    }
+    setSaving(true);
+    setError("");
+    try {
+      const payload = {
+        ...form,
+        target_value: form.target_value ? Number(form.target_value) : null,
+        secondary_value: form.secondary_value
+          ? Number(form.secondary_value)
+          : null,
+        piece_id: form.piece_id || null,
+        deadline: form.deadline || null,
+      };
+      goal?.id
+        ? await goalsApi.update(goal.id, payload)
+        : await goalsApi.create(payload);
+      onSaved();
+      onClose();
+    } catch (err) {
+      setError(err.response?.data?.error || "Failed to save goal");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div
+      className="fixed inset-0 bg-black/50 flex items-end md:items-center justify-center z-50 p-0 md:p-4"
+      onClick={onClose}
+    >
+      <div
+        className="bg-white rounded-t-3xl md:rounded-2xl w-full md:max-w-lg max-h-[95vh] overflow-y-auto shadow-xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="md:hidden flex justify-center pt-3 pb-1">
+          <div className="w-10 h-1 bg-stone-200 rounded-full" />
+        </div>
+        <div className="px-5 py-4 border-b border-stone-100 flex items-center justify-between">
+          <h2 className="font-display text-xl">
+            {goal ? "Edit goal" : "New goal"}
+          </h2>
+          <button onClick={onClose} className="text-stone-400 text-2xl p-1">
+            ×
+          </button>
+        </div>
+
+        <div className="px-5 py-5 space-y-5">
+          {/* Goal type picker */}
+          {!goal && (
+            <div>
+              <label className="label">What kind of goal?</label>
+              <div className="grid grid-cols-1 gap-2">
+                {GOAL_TYPES.map((t) => (
+                  <button
+                    key={t.value}
+                    type="button"
+                    onClick={() => selectType(t.value)}
+                    className={`text-left px-4 py-3 rounded-xl border transition-all touch-manipulation ${
+                      selectedType === t.value
+                        ? "border-amber-400 bg-amber-50 text-amber-800"
+                        : "border-stone-200 hover:border-stone-300 text-stone-700"
+                    }`}
                   >
-                    {MONTHS[label.month]}
-                  </span>
+                    <div className="text-sm font-medium">{t.label}</div>
+                    <div className="text-xs text-stone-400 mt-0.5">
+                      {t.description}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Title */}
+          {(selectedType || goal) && (
+            <>
+              <div>
+                <label className="label">Goal title</label>
+                <input
+                  className="input"
+                  placeholder={typeInfo?.description || "Describe your goal"}
+                  value={form.title}
+                  onChange={(e) =>
+                    setForm((f) => ({ ...f, title: e.target.value }))
+                  }
+                />
+              </div>
+
+              {/* Type-specific fields */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="label">
+                    {typeInfo?.targetLabel || "Target"}
+                  </label>
+                  <input
+                    type="number"
+                    className="input"
+                    placeholder={typeInfo?.targetPlaceholder || "10"}
+                    value={form.target_value}
+                    onChange={(e) =>
+                      setForm((f) => ({ ...f, target_value: e.target.value }))
+                    }
+                  />
+                </div>
+
+                {typeInfo?.fields.includes("secondary_value") && (
+                  <div>
+                    <label className="label">
+                      {typeInfo?.secondaryLabel || "For N days"}
+                    </label>
+                    <input
+                      type="number"
+                      className="input"
+                      placeholder={typeInfo?.secondaryPlaceholder || "10"}
+                      value={form.secondary_value}
+                      onChange={(e) =>
+                        setForm((f) => ({
+                          ...f,
+                          secondary_value: e.target.value,
+                        }))
+                      }
+                    />
+                  </div>
+                )}
+
+                {typeInfo?.fields.includes("unit") && (
+                  <div>
+                    <label className="label">Unit</label>
+                    <input
+                      className="input"
+                      placeholder="sessions, pages, etc."
+                      value={form.unit}
+                      onChange={(e) =>
+                        setForm((f) => ({ ...f, unit: e.target.value }))
+                      }
+                    />
+                  </div>
                 )}
               </div>
-            );
-          })}
-        </div>
-        {/* Grid */}
-        <div className="flex gap-0.5">
-          {weeks.map((week, wi) => (
-            <div key={wi} className="flex flex-col gap-0.5">
-              {week.map((date, di) => {
-                const mins = date ? data[date] || 0 : 0;
-                const level = date ? getLevel(mins) : -1;
-                const isToday = date === todayStr;
-                const isPast = date && date <= todayStr;
-                return (
-                  <div
-                    key={di}
-                    title={
-                      date
-                        ? mins
-                          ? `${date}: ${mins} min`
-                          : `${date}: no practice`
-                        : ""
+
+              {typeInfo?.fields.includes("piece_id") && pieces.length > 0 && (
+                <div>
+                  <label className="label">Which piece?</label>
+                  <select
+                    className="input"
+                    value={form.piece_id}
+                    onChange={(e) =>
+                      setForm((f) => ({ ...f, piece_id: e.target.value }))
                     }
-                    style={{
-                      width: CELL,
-                      height: CELL,
-                      borderRadius: 3,
-                      background:
-                        level === 0 && isPast
-                          ? "#f0efed"
-                          : level === 0
-                            ? "transparent"
-                            : colors[level],
-                      border: isToday
-                        ? "2px solid #BA7517"
-                        : "1px solid transparent",
-                      boxSizing: "border-box",
-                    }}
+                  >
+                    <option value="">Select a piece...</option>
+                    {pieces.map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {p.title} — {p.composer}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              {typeInfo?.fields.includes("deadline") && (
+                <div>
+                  <label className="label">Deadline (optional)</label>
+                  <input
+                    type="date"
+                    className="input"
+                    value={form.deadline}
+                    onChange={(e) =>
+                      setForm((f) => ({ ...f, deadline: e.target.value }))
+                    }
                   />
-                );
-              })}
-            </div>
-          ))}
-        </div>
-        {/* Legend */}
-        <div className="flex items-center gap-1.5 mt-3">
-          <span style={{ fontSize: 10, color: "#a8a29e" }}>Less</span>
-          {["#f0efed", "#FAEEDA", "#FAC775", "#EF9F27", "#BA7517"].map(
-            (c, i) => (
-              <div
-                key={i}
-                style={{
-                  width: 10,
-                  height: 10,
-                  borderRadius: 2,
-                  background: c,
-                }}
-              />
-            ),
+                </div>
+              )}
+
+              <div>
+                <label className="label">Notes (optional)</label>
+                <input
+                  className="input"
+                  placeholder="Any extra context..."
+                  value={form.description}
+                  onChange={(e) =>
+                    setForm((f) => ({ ...f, description: e.target.value }))
+                  }
+                />
+              </div>
+            </>
           )}
-          <span style={{ fontSize: 10, color: "#a8a29e" }}>More</span>
+
+          {error && <p className="text-red-500 text-sm">{error}</p>}
+        </div>
+
+        <div
+          className="px-5 py-4 border-t border-stone-100 flex gap-3"
+          style={{ paddingBottom: "max(16px, env(safe-area-inset-bottom))" }}
+        >
+          <button onClick={onClose} className="btn-ghost">
+            Cancel
+          </button>
+          <button
+            onClick={handleSave}
+            disabled={saving || (!selectedType && !goal)}
+            className="btn-primary disabled:opacity-40 flex-1 text-center"
+          >
+            {saving ? "Saving..." : "Save goal"}
+          </button>
         </div>
       </div>
     </div>
   );
 }
 
-export default function Sessions() {
-  const [sessions, setSessions] = useState([]);
+export default function Goals() {
+  const [goals, setGoals] = useState([]);
   const [pieces, setPieces] = useState([]);
-  const [heatmap, setHeatmap] = useState({});
+  const [done, setDone] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filterType, setFilterType] = useState("");
-  const [selected, setSelected] = useState(null);
+  const [modal, setModal] = useState(null);
 
   const load = () => {
     Promise.all([
-      sessionsApi.list({
-        limit: 100,
-        ...(filterType ? { type: filterType } : {}),
-      }),
-      statsApi.heatmap(new Date().getFullYear()),
+      goalsApi.list({ completed: false }),
+      goalsApi.list({ completed: true }),
       piecesApi.list(),
     ])
-      .then(([s, h, p]) => {
-        setSessions(s.data.data || []);
-        setHeatmap(h.data.data || {});
+      .then(([a, c, p]) => {
+        setGoals(a.data.data || []);
+        setDone(c.data.data || []);
         setPieces(p.data.data || []);
       })
       .finally(() => setLoading(false));
@@ -193,110 +456,96 @@ export default function Sessions() {
 
   useEffect(() => {
     load();
-  }, [filterType]);
+  }, []);
+
+  const handleComplete = async (id) => {
+    await goalsApi.complete(id);
+    load();
+  };
+  const handleDelete = async (id) => {
+    if (!confirm("Delete this goal?")) return;
+    await goalsApi.delete(id);
+    load();
+  };
 
   return (
     <div className="page-container space-y-4">
-      <h1 className="font-display text-2xl text-stone-900">Sessions</h1>
-
-      <div className="card">
-        <h3 className="text-sm font-medium text-stone-700 mb-3">
-          {new Date().getFullYear()} practice calendar
-        </h3>
-        <Heatmap data={heatmap} />
-      </div>
-
-      <div className="card">
-        <div className="flex items-center justify-between mb-4 gap-3">
-          <h3 className="text-sm font-medium text-stone-700">
-            All sessions
-            {sessions.length > 0 && (
-              <span className="ml-1.5 text-stone-300 font-normal">
-                {sessions.length}
-              </span>
-            )}
-          </h3>
-          <select
-            className="input text-sm w-36 flex-shrink-0"
-            value={filterType}
-            onChange={(e) => setFilterType(e.target.value)}
-          >
-            <option value="">All types</option>
-            {PRACTICE_TYPES.map((t) => (
-              <option key={t} value={t}>
-                {PRACTICE_LABELS[t]}
-              </option>
-            ))}
-          </select>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="font-display text-2xl text-stone-900">Goals</h1>
+          <p className="text-xs text-stone-400 mt-0.5">
+            Progress auto-calculates from your sessions
+          </p>
         </div>
-
-        {loading ? (
-          <p className="text-stone-400 text-sm">Loading...</p>
-        ) : sessions.length === 0 ? (
-          <p className="text-stone-400 text-sm">No sessions yet.</p>
-        ) : (
-          <div className="divide-y divide-stone-100">
-            {sessions.map((s) => (
-              <button
-                key={s.id}
-                onClick={() => setSelected(s)}
-                className="w-full text-left py-3 flex items-start gap-3 hover:bg-stone-50 active:bg-stone-100 -mx-1 px-1 rounded-xl transition-colors touch-manipulation"
-              >
-                <div className="w-2 h-2 rounded-full bg-amber-400 mt-1.5 flex-shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-sm font-medium">
-                      {formatDate(s.date)}
-                    </span>
-                    <span className="text-sm text-stone-500">
-                      {formatDuration(s.duration_minutes)}
-                    </span>
-                    {s.overall_feel && (
-                      <span className="text-sm">
-                        {FEEL_EMOJI[s.overall_feel]}
-                      </span>
-                    )}
-                    {s.starting_bpm && s.ending_bpm && (
-                      <span className="text-xs text-stone-400 bg-stone-50 px-2 py-0.5 rounded-full">
-                        {s.starting_bpm}→{s.ending_bpm} BPM
-                      </span>
-                    )}
-                  </div>
-                  <div className="flex flex-wrap gap-1 mt-1">
-                    {(s.practice_types || []).map((t) => (
-                      <span key={t} className="tag">
-                        {PRACTICE_LABELS[t] || t}
-                      </span>
-                    ))}
-                  </div>
-                  {s.notes && (
-                    <p className="text-xs text-stone-400 mt-1 line-clamp-1">
-                      {s.notes}
-                    </p>
-                  )}
-                </div>
-                <span className="text-stone-300 text-sm flex-shrink-0 mt-0.5">
-                  ›
-                </span>
-              </button>
-            ))}
-          </div>
-        )}
+        <button onClick={() => setModal("add")} className="btn-primary">
+          + New
+        </button>
       </div>
 
-      {selected && (
-        <SessionDetailModal
-          session={selected}
+      {loading ? (
+        <p className="text-stone-400 text-sm">Loading...</p>
+      ) : (
+        <>
+          {goals.length === 0 ? (
+            <div className="card text-center py-10 space-y-3">
+              <p className="text-3xl">🎯</p>
+              <p className="text-stone-600 font-medium">No active goals</p>
+              <p className="text-stone-400 text-sm">
+                Set a streak, weekly target, BPM goal, and more
+              </p>
+              <button
+                onClick={() => setModal("add")}
+                className="btn-primary mx-auto"
+              >
+                Set your first goal
+              </button>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {goals.map((g) => (
+                <GoalCard
+                  key={g.id}
+                  goal={g}
+                  onEdit={() => setModal(g)}
+                  onComplete={() => handleComplete(g.id)}
+                  onDelete={() => handleDelete(g.id)}
+                />
+              ))}
+            </div>
+          )}
+
+          {done.length > 0 && (
+            <div>
+              <h2 className="text-sm font-medium text-stone-400 mb-3">
+                Completed ({done.length})
+              </h2>
+              <div className="space-y-2">
+                {done.slice(0, 5).map((g) => (
+                  <div
+                    key={g.id}
+                    className="flex items-center gap-3 py-2.5 px-4 bg-stone-50 rounded-xl border border-stone-100"
+                  >
+                    <span className="text-green-500">✓</span>
+                    <span className="text-sm text-stone-400 line-through flex-1 truncate">
+                      {g.title}
+                    </span>
+                    <span className="text-xs text-stone-300 flex-shrink-0">
+                      {formatDate(g.completed_at?.split("T")[0])}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </>
+      )}
+
+      {modal && (
+        <GoalModal
+          goal={modal === "add" ? null : modal}
           pieces={pieces}
-          onClose={() => setSelected(null)}
-          onSaved={() => {
-            setSelected(null);
-            load();
-          }}
-          onDeleted={() => {
-            setSelected(null);
-            load();
-          }}
+          onClose={() => setModal(null)}
+          onSaved={load}
         />
       )}
     </div>

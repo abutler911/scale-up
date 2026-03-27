@@ -16,16 +16,59 @@ export default function AppShell() {
   const [showLog, setShowLog] = useState(false);
 
   return (
-    <div className="flex h-screen bg-stone-50 overflow-hidden">
+    <div
+      style={{
+        display: "flex",
+        height: "100vh",
+        background: "#0f0f0f",
+        overflow: "hidden",
+      }}
+    >
       {/* Sidebar — desktop only */}
-      <aside className="hidden md:flex w-52 flex-shrink-0 bg-white border-r border-stone-200 flex-col">
-        <div className="px-5 py-5 border-b border-stone-100">
-          <h1 className="font-display text-xl text-stone-900 leading-none">
+      <aside
+        style={{
+          width: 210,
+          flexShrink: 0,
+          background: "#111",
+          borderRight: "1px solid #1e1e1e",
+          display: "flex",
+          flexDirection: "column",
+        }}
+        className="hidden md:flex"
+      >
+        <div
+          style={{
+            padding: "22px 20px 18px",
+            borderBottom: "1px solid #1e1e1e",
+          }}
+        >
+          <h1
+            style={{
+              fontFamily: "'Cormorant Garamond', serif",
+              fontSize: 22,
+              fontWeight: 600,
+              color: "#f0f0f0",
+              margin: 0,
+              lineHeight: 1,
+            }}
+          >
             ScaleUp!
           </h1>
-          <p className="text-xs text-stone-400 mt-1">piano practice tracker</p>
+          <p style={{ fontSize: 11, color: "#444", marginTop: 4 }}>
+            piano practice tracker
+          </p>
         </div>
-        <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
+
+        <nav
+          style={{
+            flex: 1,
+            padding: "12px 10px",
+            overflowY: "auto",
+            display: "flex",
+            flexDirection: "column",
+            gap: 2,
+          }}
+        >
           {NAV.map(({ to, label, icon }) => (
             <NavLink
               key={to}
@@ -35,21 +78,43 @@ export default function AppShell() {
                 `nav-item ${isActive ? "nav-item-active" : ""}`
               }
             >
-              <span className="text-base w-5 text-center">{icon}</span>
+              <span style={{ fontSize: 15, width: 20, textAlign: "center" }}>
+                {icon}
+              </span>
               <span>{label}</span>
             </NavLink>
           ))}
         </nav>
-        <div className="px-3 py-4 border-t border-stone-100 space-y-2">
+
+        <div
+          style={{
+            padding: "12px 10px",
+            borderTop: "1px solid #1e1e1e",
+            display: "flex",
+            flexDirection: "column",
+            gap: 8,
+          }}
+        >
           <button
             onClick={() => setShowLog(true)}
-            className="w-full btn-primary text-center"
+            className="btn-primary"
+            style={{ width: "100%" }}
           >
             + Log Session
           </button>
           <button
             onClick={logout}
-            className="w-full text-xs text-stone-400 hover:text-stone-600 py-1 transition-colors"
+            style={{
+              fontSize: 11,
+              color: "#444",
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              padding: "4px 0",
+              transition: "color 0.15s",
+            }}
+            onMouseEnter={(e) => (e.target.style.color = "#888")}
+            onMouseLeave={(e) => (e.target.style.color = "#444")}
           >
             Sign out
           </button>
@@ -57,24 +122,61 @@ export default function AppShell() {
       </aside>
 
       {/* Main */}
-      <main className="flex-1 overflow-y-auto overflow-x-hidden">
+      <main style={{ flex: 1, overflowY: "auto", overflowX: "hidden" }}>
         {/* Mobile topbar */}
-        <div className="md:hidden sticky top-0 z-10 bg-white border-b border-stone-200 px-4 py-3 flex items-center justify-between">
-          <h1 className="font-display text-lg text-stone-900">ScaleUp!</h1>
+        <div
+          className="md:hidden"
+          style={{
+            position: "sticky",
+            top: 0,
+            zIndex: 10,
+            background: "#111",
+            borderBottom: "1px solid #1e1e1e",
+            padding: "12px 16px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <h1
+            style={{
+              fontFamily: "'Cormorant Garamond', serif",
+              fontSize: 20,
+              fontWeight: 600,
+              color: "#f0f0f0",
+              margin: 0,
+            }}
+          >
+            ScaleUp!
+          </h1>
           <button
             onClick={() => setShowLog(true)}
-            className="bg-amber-500 text-white text-sm font-medium px-3 py-1.5 rounded-lg active:scale-95 transition-transform touch-manipulation"
+            className="btn-primary"
+            style={{ padding: "7px 14px", fontSize: 12 }}
           >
             + Log
           </button>
         </div>
+
         <Outlet context={{ openLogSession: () => setShowLog(true) }} />
       </main>
 
       {/* Bottom nav — mobile only */}
       <nav
-        className="md:hidden fixed bottom-0 left-0 right-0 z-20 bg-white border-t border-stone-200 px-2 pb-safe flex items-center justify-around"
-        style={{ paddingBottom: "max(8px, env(safe-area-inset-bottom))" }}
+        className="md:hidden"
+        style={{
+          position: "fixed",
+          bottom: 0,
+          left: 0,
+          right: 0,
+          zIndex: 20,
+          background: "#111",
+          borderTop: "1px solid #1e1e1e",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-around",
+          padding: `8px 8px max(8px, env(safe-area-inset-bottom))`,
+        }}
       >
         {NAV.map(({ to, label, icon }) => (
           <NavLink
@@ -85,8 +187,8 @@ export default function AppShell() {
               `bottom-nav-item ${isActive ? "active" : ""}`
             }
           >
-            <span className="text-xl leading-none">{icon}</span>
-            <span className="text-[10px] font-medium">{label}</span>
+            <span style={{ fontSize: 20, lineHeight: 1 }}>{icon}</span>
+            <span style={{ fontSize: 10, fontWeight: 500 }}>{label}</span>
           </NavLink>
         ))}
       </nav>

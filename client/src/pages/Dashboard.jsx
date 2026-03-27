@@ -28,10 +28,10 @@ const TYPE_EMOJI = {
 };
 
 function progressColor(p) {
-  if (p >= 100) return "#639922";
-  if (p >= 66) return "#BA7517";
-  if (p >= 33) return "#EF9F27";
-  return "#d6d3d1";
+  if (p >= 100) return "#22D3EE";
+  if (p >= 66) return "#38BDF8";
+  if (p >= 33) return "#0EA5E9";
+  return "#1e3a4a";
 }
 
 export default function Dashboard() {
@@ -95,7 +95,7 @@ export default function Dashboard() {
           <p className="text-xs text-stone-400 uppercase tracking-wide mb-1">
             Streak
           </p>
-          <p className="text-2xl font-medium text-amber-500">
+          <p style={{ fontSize: 22, fontWeight: 500, color: "#38BDF8" }}>
             {streak?.currentStreak ?? 0}
             <span className="text-sm ml-1">days</span>
           </p>
@@ -186,7 +186,11 @@ export default function Dashboard() {
                   <div className="h-2 bg-stone-100 rounded-full overflow-hidden">
                     <div
                       className="h-full rounded-full transition-all duration-700"
-                      style={{ width: `${p}%`, background: progressColor(p) }}
+                      style={{
+                        width: `${p}%`,
+                        background: progressColor(p),
+                        transition: "width 0.6s ease",
+                      }}
                     />
                   </div>
                 </div>
@@ -215,14 +219,16 @@ export default function Dashboard() {
               contentStyle={{
                 fontSize: 12,
                 borderRadius: 8,
-                border: "1px solid #e7e5e4",
+                border: "1px solid #2e2e2e",
+                background: "#1a1a1a",
+                color: "#f0f0f0",
               }}
             />
             <Bar dataKey="minutes" radius={[4, 4, 0, 0]}>
               {recentWeeks.map((_, i) => (
                 <Cell
                   key={i}
-                  fill={i === recentWeeks.length - 1 ? "#BA7517" : "#e7e5e4"}
+                  fill={i === recentWeeks.length - 1 ? "#38BDF8" : "#222"}
                 />
               ))}
             </Bar>

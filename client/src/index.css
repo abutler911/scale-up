@@ -9,76 +9,243 @@
   html {
     -webkit-text-size-adjust: 100%;
   }
+
   body {
-    @apply bg-stone-50 text-stone-900 font-sans antialiased;
+    background: #0f0f0f;
+    color: #f0f0f0;
+    font-family: "DM Sans", system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
     overscroll-behavior: none;
   }
+
   h1,
   h2,
   h3 {
-    @apply font-display;
+    font-family: "Cormorant Garamond", Georgia, serif;
+    font-weight: 600;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #2e2e2e;
+    border-radius: 2px;
+  }
+
+  input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(1) opacity(0.4);
   }
 }
 
 @layer components {
+  /* ── Buttons ─────────────────────────────── */
   .btn-primary {
-    @apply bg-amber-500 hover:bg-amber-600 active:scale-95 text-white font-medium px-4 py-2.5 rounded-xl text-sm transition-all touch-manipulation;
+    background: #38bdf8;
+    color: #0a0a0a;
+    font-weight: 500;
+    padding: 10px 18px;
+    border-radius: 10px;
+    font-size: 13px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.15s;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
   }
+  .btn-primary:hover {
+    background: #7dd3fc;
+  }
+  .btn-primary:active {
+    transform: scale(0.97);
+  }
+
   .btn-ghost {
-    @apply border border-stone-200 hover:bg-stone-100 active:scale-95 text-stone-700 font-medium px-4 py-2.5 rounded-xl text-sm transition-all touch-manipulation;
+    background: transparent;
+    color: #888;
+    font-weight: 500;
+    padding: 10px 18px;
+    border-radius: 10px;
+    font-size: 13px;
+    border: 1px solid #2e2e2e;
+    cursor: pointer;
+    transition: all 0.15s;
+    touch-action: manipulation;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
   }
+  .btn-ghost:hover {
+    border-color: #444;
+    color: #f0f0f0;
+  }
+  .btn-ghost:active {
+    transform: scale(0.97);
+  }
+
+  /* ── Cards ───────────────────────────────── */
   .card {
-    @apply bg-white border border-stone-200 rounded-2xl p-4 md:p-5;
+    background: #1a1a1a;
+    border: 1px solid #2e2e2e;
+    border-radius: 16px;
+    padding: 1rem 1.25rem;
   }
+
+  /* ── Stat cards ──────────────────────────── */
+  .stat-card {
+    background: #141414;
+    border: 1px solid #252525;
+    border-radius: 14px;
+    padding: 1rem;
+  }
+
+  /* ── Form elements ───────────────────────── */
   .input {
-    @apply w-full border border-stone-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 bg-white;
+    width: 100%;
+    background: #111;
+    border: 1px solid #2e2e2e;
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 13px;
+    color: #f0f0f0;
+    font-family: "DM Sans", sans-serif;
     min-height: 44px;
+    transition: border-color 0.15s;
+    outline: none;
+    -webkit-appearance: none;
   }
+  .input:focus {
+    border-color: #38bdf8;
+    box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.1);
+  }
+  .input::placeholder {
+    color: #444;
+  }
+
+  select.input option {
+    background: #1a1a1a;
+    color: #f0f0f0;
+  }
+
   .label {
-    @apply block text-xs font-medium text-stone-500 mb-1.5;
+    display: block;
+    font-size: 11px;
+    font-weight: 500;
+    color: #666;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
   }
+
+  /* ── Chips ───────────────────────────────── */
   .chip {
-    @apply px-3 py-2 rounded-xl text-xs border border-stone-200 text-stone-600 cursor-pointer hover:border-amber-400 hover:text-amber-600 transition-colors touch-manipulation;
+    padding: 7px 14px;
+    border-radius: 10px;
+    font-size: 12px;
+    border: 1px solid #2e2e2e;
+    color: #888;
+    cursor: pointer;
+    transition: all 0.15s;
+    touch-action: manipulation;
     min-height: 36px;
     display: inline-flex;
     align-items: center;
+    background: transparent;
+  }
+  .chip:hover {
+    border-color: #38bdf8;
+    color: #38bdf8;
   }
   .chip-active {
-    @apply bg-amber-500 border-amber-500 text-white;
+    background: rgba(56, 189, 248, 0.12);
+    border-color: #38bdf8;
+    color: #38bdf8;
   }
-  .stat-card {
-    @apply bg-stone-50 border border-stone-100 rounded-2xl p-4;
-  }
-  .nav-item {
-    @apply flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-stone-500 hover:text-stone-900 hover:bg-stone-100 transition-colors cursor-pointer touch-manipulation;
-  }
-  .nav-item-active {
-    @apply bg-amber-50 text-amber-700 font-medium;
-  }
+
+  /* ── Tags ────────────────────────────────── */
   .tag {
-    @apply inline-block px-2 py-0.5 rounded-full text-xs bg-stone-100 text-stone-500;
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-size: 11px;
+    background: #222;
+    color: #666;
+    border: 1px solid #2e2e2e;
   }
+
+  /* ── Progress ────────────────────────────── */
   .progress-bar {
-    @apply h-1.5 bg-stone-100 rounded-full overflow-hidden;
+    height: 6px;
+    background: #222;
+    border-radius: 99px;
+    overflow: hidden;
   }
   .progress-fill {
-    @apply h-full bg-amber-500 rounded-full transition-all duration-500;
+    height: 100%;
+    background: #38bdf8;
+    border-radius: 99px;
+    transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
   }
+
+  /* ── Nav items ───────────────────────────── */
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 12px;
+    border-radius: 10px;
+    font-size: 13px;
+    color: #666;
+    cursor: pointer;
+    transition: all 0.15s;
+    touch-action: manipulation;
+    text-decoration: none;
+  }
+  .nav-item:hover {
+    color: #f0f0f0;
+    background: #1f1f1f;
+  }
+  .nav-item-active {
+    color: #38bdf8 !important;
+    background: rgba(56, 189, 248, 0.08) !important;
+  }
+
+  /* ── Bottom nav ──────────────────────────── */
   .bottom-nav-item {
-    @apply flex flex-col items-center gap-0.5 py-2 px-3 rounded-xl text-stone-400 transition-colors touch-manipulation cursor-pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 8px 12px;
+    border-radius: 10px;
+    color: #555;
+    transition: color 0.15s;
+    cursor: pointer;
+    touch-action: manipulation;
     min-width: 56px;
+    text-decoration: none;
   }
   .bottom-nav-item.active {
-    @apply text-amber-600;
+    color: #38bdf8;
   }
+
+  /* ── Page container ──────────────────────── */
   .page-container {
-    @apply px-4 py-5 md:px-8 md:py-8;
-    padding-bottom: 88px;
+    padding: 20px 16px 88px;
     max-width: 1024px;
   }
   @media (min-width: 768px) {
     .page-container {
-      padding-bottom: 2rem;
+      padding: 32px;
+      padding-bottom: 32px;
     }
   }
 }
