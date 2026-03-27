@@ -5,10 +5,10 @@ import { PIECE_STATUSES, formatDate } from "../utils/index.js";
 const KANBAN_COLS = PIECE_STATUSES.filter((s) => s.value !== "shelved");
 
 const COL_STYLES = {
-  learning: { border: "border-blue-300", text: "text-blue-600" },
-  polishing: { border: "border-amber-300", text: "text-amber-600" },
-  performance_ready: { border: "border-green-300", text: "text-green-600" },
-  mastered: { border: "border-purple-300", text: "text-purple-600" },
+  learning: { border: "border-[#0284C7]", text: "text-[#38BDF8]" },
+  polishing: { border: "border-amber-300", text: "text-[#38BDF8]" },
+  performance_ready: { border: "border-green-300", text: "text-[#22D3EE]" },
+  mastered: { border: "border-[#7c3aed]", text: "text-[#a78bfa]" },
 };
 
 function PieceModal({ piece, onClose, onSaved }) {
@@ -46,18 +46,20 @@ function PieceModal({ piece, onClose, onSaved }) {
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-t-3xl md:rounded-2xl w-full md:max-w-lg max-h-[92vh] overflow-y-auto shadow-xl"
+        className="rounded-t-3xl md:rounded-2xl"
+        style={{ background: "#1a1a1a" }}
+        className2=" w-full md:max-w-lg max-h-[92vh] overflow-y-auto shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Drag handle on mobile */}
         <div className="md:hidden flex justify-center pt-3 pb-1">
-          <div className="w-10 h-1 bg-stone-200 rounded-full" />
+          <div className="w-10 h-1 bg-[#252525] rounded-full" />
         </div>
-        <div className="px-5 py-4 border-b border-stone-100 flex items-center justify-between">
+        <div className="px-5 py-4 border-b border-[#222] flex items-center justify-between">
           <h2 className="font-display text-xl">
             {piece ? "Edit piece" : "Add piece"}
           </h2>
-          <button onClick={onClose} className="text-stone-400 text-xl p-1">
+          <button onClick={onClose} className="text-[#555] text-xl p-1">
             ×
           </button>
         </div>
@@ -151,7 +153,7 @@ function PieceModal({ piece, onClose, onSaved }) {
             />
           </div>
         </div>
-        <div className="px-5 py-4 border-t border-stone-100 flex gap-3 justify-end">
+        <div className="px-5 py-4 border-t border-[#222] flex gap-3 justify-end">
           <button onClick={onClose} className="btn-ghost">
             Cancel
           </button>
@@ -192,14 +194,14 @@ export default function Repertoire() {
   return (
     <div className="page-container space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="font-display text-2xl text-stone-900">Repertoire</h1>
+        <h1 className="font-display text-2xl text-[#f0f0f0]">Repertoire</h1>
         <button onClick={() => setModal("add")} className="btn-primary">
           + Add
         </button>
       </div>
 
       {loading ? (
-        <p className="text-stone-400 text-sm">Loading...</p>
+        <p className="text-[#555] text-sm">Loading...</p>
       ) : (
         /* Horizontal scroll on mobile, grid on desktop */
         <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0">
@@ -218,7 +220,7 @@ export default function Repertoire() {
                     className={`text-xs font-medium uppercase tracking-wider mb-3 pb-2 border-b-2 ${s.text} ${s.border}`}
                   >
                     {col.label}
-                    <span className="ml-1.5 text-stone-300 font-normal normal-case tracking-normal">
+                    <span className="ml-1.5 text-[#444] font-normal normal-case tracking-normal">
                       {byStatus(col.value).length}
                     </span>
                   </div>
@@ -226,50 +228,50 @@ export default function Repertoire() {
                     {byStatus(col.value).map((p) => (
                       <div
                         key={p.id}
-                        className="bg-white border border-stone-200 rounded-xl p-3 group active:scale-[0.98] transition-transform touch-manipulation"
+                        className="bg-[#1a1a1a] border border-[#2e2e2e] rounded-xl p-3 group active:scale-[0.98] transition-transform touch-manipulation"
                       >
                         <div className="flex items-start justify-between gap-1">
-                          <p className="text-sm font-medium text-stone-800 leading-snug">
+                          <p className="text-sm font-medium text-[#e0e0e0] leading-snug">
                             {p.title}
                           </p>
                           <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                             <button
                               onClick={() => setModal(p)}
-                              className="text-stone-400 hover:text-stone-700 text-xs p-0.5 touch-manipulation"
+                              className="text-[#555] hover:text-[#b0b0b0] text-xs p-0.5 touch-manipulation"
                             >
                               ✏
                             </button>
                             <button
                               onClick={() => handleDelete(p.id)}
-                              className="text-stone-400 hover:text-red-500 text-xs p-0.5 touch-manipulation"
+                              className="text-[#555] hover:text-[#f87171] text-xs p-0.5 touch-manipulation"
                             >
                               ✕
                             </button>
                           </div>
                         </div>
                         {p.composer && (
-                          <p className="text-xs text-stone-400 mt-0.5">
+                          <p className="text-xs text-[#555] mt-0.5">
                             {p.composer}
                           </p>
                         )}
                         {(p.current_bpm || p.target_bpm) && (
-                          <div className="mt-2 text-xs text-stone-500 bg-stone-50 rounded-lg px-2 py-1 inline-block">
+                          <div className="mt-2 text-xs text-[#666] bg-[#141414] rounded-lg px-2 py-1 inline-block">
                             {p.current_bpm && <span>{p.current_bpm}</span>}
                             {p.current_bpm && p.target_bpm && (
-                              <span className="text-stone-300 mx-1">/</span>
+                              <span className="text-[#444] mx-1">/</span>
                             )}
                             {p.target_bpm && (
-                              <span className="text-stone-400">
+                              <span className="text-[#555]">
                                 {p.target_bpm}
                               </span>
                             )}
-                            <span className="text-stone-300 ml-0.5"> BPM</span>
+                            <span className="text-[#444] ml-0.5"> BPM</span>
                           </div>
                         )}
                       </div>
                     ))}
                     {byStatus(col.value).length === 0 && (
-                      <p className="text-xs text-stone-300 text-center py-4">
+                      <p className="text-xs text-[#444] text-center py-4">
                         Empty
                       </p>
                     )}
@@ -283,14 +285,14 @@ export default function Repertoire() {
 
       {pieces.filter((p) => p.status === "shelved").length > 0 && (
         <div className="card">
-          <h3 className="text-sm font-medium text-stone-400 mb-3">Shelved</h3>
+          <h3 className="text-sm font-medium text-[#555] mb-3">Shelved</h3>
           <div className="flex flex-wrap gap-2">
             {pieces
               .filter((p) => p.status === "shelved")
               .map((p) => (
                 <div
                   key={p.id}
-                  className="text-xs text-stone-400 bg-stone-50 border border-stone-100 rounded-lg px-3 py-1.5"
+                  className="text-xs text-[#555] bg-[#141414] border border-[#222] rounded-lg px-3 py-1.5"
                 >
                   {p.title}
                   {p.composer && ` — ${p.composer}`}

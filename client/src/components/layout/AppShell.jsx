@@ -125,7 +125,7 @@ export default function AppShell() {
       <main style={{ flex: 1, overflowY: "auto", overflowX: "hidden" }}>
         {/* Mobile topbar */}
         <div
-          className="md:hidden"
+          className="flex md:hidden items-center justify-between"
           style={{
             position: "sticky",
             top: 0,
@@ -133,9 +133,6 @@ export default function AppShell() {
             background: "#111",
             borderBottom: "1px solid #1e1e1e",
             padding: "12px 16px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
           }}
         >
           <h1
@@ -163,7 +160,7 @@ export default function AppShell() {
 
       {/* Bottom nav — mobile only */}
       <nav
-        className="md:hidden"
+        className="flex md:hidden items-center justify-around"
         style={{
           position: "fixed",
           bottom: 0,
@@ -172,9 +169,6 @@ export default function AppShell() {
           zIndex: 20,
           background: "#111",
           borderTop: "1px solid #1e1e1e",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-around",
           padding: `8px 8px max(8px, env(safe-area-inset-bottom))`,
         }}
       >

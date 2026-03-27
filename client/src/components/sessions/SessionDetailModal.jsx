@@ -79,20 +79,20 @@ export default function SessionDetailModal({
   const ViewMode = () => (
     <div className="px-5 py-5 space-y-5">
       {/* Date + Duration hero */}
-      <div className="bg-stone-50 rounded-2xl p-4 flex items-center justify-between">
+      <div className="bg-[#141414] rounded-2xl p-4 flex items-center justify-between">
         <div>
-          <p className="text-xs text-stone-400 uppercase tracking-wide mb-0.5">
+          <p className="text-xs text-[#555] uppercase tracking-wide mb-0.5">
             Date
           </p>
-          <p className="text-lg font-medium text-stone-900">
+          <p className="text-lg font-medium text-[#f0f0f0]">
             {formatDate(session.date)}
           </p>
         </div>
         <div className="text-right">
-          <p className="text-xs text-stone-400 uppercase tracking-wide mb-0.5">
+          <p className="text-xs text-[#555] uppercase tracking-wide mb-0.5">
             Duration
           </p>
-          <p className="text-lg font-medium text-stone-900">
+          <p className="text-lg font-medium text-[#f0f0f0]">
             {formatDuration(session.duration_minutes)}
           </p>
         </div>
@@ -139,29 +139,29 @@ export default function SessionDetailModal({
           <div className="flex gap-4">
             {session.starting_bpm && (
               <div className="stat-card flex-1 text-center">
-                <p className="text-xs text-stone-400 mb-0.5">Start</p>
+                <p className="text-xs text-[#555] mb-0.5">Start</p>
                 <p className="text-xl font-medium">{session.starting_bpm}</p>
               </div>
             )}
             {session.ending_bpm && (
               <div className="stat-card flex-1 text-center">
-                <p className="text-xs text-stone-400 mb-0.5">End</p>
-                <p className="text-xl font-medium text-amber-500">
+                <p className="text-xs text-[#555] mb-0.5">End</p>
+                <p className="text-xl font-medium text-[#38BDF8]">
                   {session.ending_bpm}
                 </p>
               </div>
             )}
             {session.target_bpm && (
               <div className="stat-card flex-1 text-center">
-                <p className="text-xs text-stone-400 mb-0.5">Target</p>
-                <p className="text-xl font-medium text-stone-400">
+                <p className="text-xs text-[#555] mb-0.5">Target</p>
+                <p className="text-xl font-medium text-[#555]">
                   {session.target_bpm}
                 </p>
               </div>
             )}
           </div>
           {session.starting_bpm && session.ending_bpm && (
-            <p className="text-xs text-stone-400 mt-2 text-center">
+            <p className="text-xs text-[#555] mt-2 text-center">
               +{session.ending_bpm - session.starting_bpm} BPM this session
               {session.target_bpm &&
                 ` · ${session.target_bpm - session.ending_bpm} BPM to go`}
@@ -174,8 +174,8 @@ export default function SessionDetailModal({
       {session.notes && (
         <div>
           <p className="label">Notes</p>
-          <div className="bg-stone-50 rounded-xl p-4">
-            <p className="text-sm text-stone-700 leading-relaxed whitespace-pre-wrap">
+          <div className="bg-[#141414] rounded-xl p-4">
+            <p className="text-sm text-[#b0b0b0] leading-relaxed whitespace-pre-wrap">
               {session.notes}
             </p>
           </div>
@@ -185,7 +185,7 @@ export default function SessionDetailModal({
       {!session.notes &&
         !session.practice_types?.length &&
         !session.starting_bpm && (
-          <p className="text-stone-400 text-sm text-center py-2">
+          <p className="text-[#555] text-sm text-center py-2">
             No additional details logged.
           </p>
         )}
@@ -323,7 +323,7 @@ export default function SessionDetailModal({
         />
       </div>
 
-      {error && <p className="text-red-500 text-sm">{error}</p>}
+      {error && <p className="text-[#f87171] text-sm">{error}</p>}
     </div>
   );
 
@@ -333,16 +333,16 @@ export default function SessionDetailModal({
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-t-3xl md:rounded-2xl w-full md:max-w-lg max-h-[95vh] overflow-y-auto shadow-xl"
+        className="bg-[#1a1a1a] rounded-t-3xl md:rounded-2xl w-full md:max-w-lg max-h-[95vh] overflow-y-auto shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Drag handle */}
         <div className="md:hidden flex justify-center pt-3 pb-1">
-          <div className="w-10 h-1 bg-stone-200 rounded-full" />
+          <div className="w-10 h-1 bg-[#252525] rounded-full" />
         </div>
 
         {/* Header */}
-        <div className="px-5 py-4 border-b border-stone-100 flex items-center justify-between">
+        <div className="px-5 py-4 border-b border-[#222] flex items-center justify-between">
           <h2 className="font-display text-xl">
             {editing ? "Edit session" : "Session details"}
           </h2>
@@ -350,14 +350,14 @@ export default function SessionDetailModal({
             {!editing && (
               <button
                 onClick={() => setEditing(true)}
-                className="text-sm text-amber-600 font-medium touch-manipulation"
+                className="text-sm text-[#38BDF8] font-medium touch-manipulation"
               >
                 Edit
               </button>
             )}
             <button
               onClick={onClose}
-              className="text-stone-400 text-2xl leading-none p-1 touch-manipulation"
+              className="text-[#555] text-2xl leading-none p-1 touch-manipulation"
             >
               ×
             </button>
@@ -368,7 +368,7 @@ export default function SessionDetailModal({
 
         {/* Footer */}
         <div
-          className="px-5 py-4 border-t border-stone-100"
+          className="px-5 py-4 border-t border-[#222]"
           style={{ paddingBottom: "max(16px, env(safe-area-inset-bottom))" }}
         >
           {editing ? (
@@ -388,7 +388,7 @@ export default function SessionDetailModal({
             <div className="flex gap-3">
               {confirmDelete ? (
                 <>
-                  <p className="text-xs text-stone-500 flex-1 self-center">
+                  <p className="text-xs text-[#666] flex-1 self-center">
                     Delete this session?
                   </p>
                   <button
@@ -399,7 +399,7 @@ export default function SessionDetailModal({
                   </button>
                   <button
                     onClick={handleDelete}
-                    className="bg-red-500 hover:bg-red-600 text-white font-medium px-4 py-2.5 rounded-xl text-sm transition-colors"
+                    className="bg-[#ef4444] hover:bg-[#dc2626] text-white font-medium px-4 py-2.5 rounded-xl text-sm transition-colors"
                   >
                     Delete
                   </button>
@@ -408,7 +408,7 @@ export default function SessionDetailModal({
                 <>
                   <button
                     onClick={() => setConfirmDelete(true)}
-                    className="text-sm text-stone-400 hover:text-red-500 transition-colors touch-manipulation py-2"
+                    className="text-sm text-[#555] hover:text-[#f87171] transition-colors touch-manipulation py-2"
                   >
                     Delete session
                   </button>

@@ -152,18 +152,18 @@ export default function LogSessionModal({ onClose, onSaved }) {
       onClick={handleClose}
     >
       <div
-        className="bg-white rounded-t-3xl md:rounded-2xl w-full md:max-w-lg max-h-[95vh] overflow-y-auto shadow-xl"
+        className="bg-[#1a1a1a] rounded-t-3xl md:rounded-2xl w-full md:max-w-lg max-h-[95vh] overflow-y-auto shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="md:hidden flex justify-center pt-3 pb-1">
-          <div className="w-10 h-1 bg-stone-200 rounded-full" />
+          <div className="w-10 h-1 bg-[#252525] rounded-full" />
         </div>
 
-        <div className="px-5 py-4 border-b border-stone-100 flex items-center justify-between">
+        <div className="px-5 py-4 border-b border-[#222] flex items-center justify-between">
           <h2 className="font-display text-xl">Log a session</h2>
           <button
             onClick={handleClose}
-            className="text-stone-400 text-2xl leading-none p-1 touch-manipulation"
+            className="text-[#555] text-2xl leading-none p-1 touch-manipulation"
           >
             ×
           </button>
@@ -171,31 +171,31 @@ export default function LogSessionModal({ onClose, onSaved }) {
 
         <div className="px-5 py-5 space-y-5">
           {/* Timer */}
-          <div className="bg-stone-50 rounded-2xl p-4 text-center">
+          <div className="bg-[#141414] rounded-2xl p-4 text-center">
             <div
-              className={`text-5xl font-mono font-medium tracking-tight mb-1 ${timerRunning ? "text-amber-500" : "text-stone-900"}`}
+              className={`text-5xl font-mono font-medium tracking-tight mb-1 ${timerRunning ? "text-[#38BDF8]" : "text-[#f0f0f0]"}`}
             >
               {formatSeconds(timerSeconds)}
             </div>
             {timerRunning && (
-              <p className="text-xs text-stone-400 mb-3">
+              <p className="text-xs text-[#555] mb-3">
                 Timer keeps running if you close this
               </p>
             )}
             {!timerRunning && timerSeconds === 0 && (
-              <p className="text-xs text-stone-400 mb-3">
+              <p className="text-xs text-[#555] mb-3">
                 Start to track your session in real time
               </p>
             )}
             {!timerRunning && timerSeconds > 0 && (
-              <p className="text-xs text-amber-600 mb-3">
+              <p className="text-xs text-[#38BDF8] mb-3">
                 Paused — {Math.ceil(timerSeconds / 60)} min logged
               </p>
             )}
             <div className="flex gap-2 justify-center">
               <button
                 onClick={toggleTimer}
-                className={`btn-primary px-6 ${timerRunning ? "bg-red-500 hover:bg-red-600" : ""}`}
+                className={`btn-primary px-6 ${timerRunning ? "bg-[#ef4444] hover:bg-[#dc2626]" : ""}`}
               >
                 {timerRunning
                   ? "⏸ Pause"
@@ -350,11 +350,11 @@ export default function LogSessionModal({ onClose, onSaved }) {
             />
           </div>
 
-          {error && <p className="text-red-500 text-sm">{error}</p>}
+          {error && <p className="text-[#f87171] text-sm">{error}</p>}
         </div>
 
         <div
-          className="px-5 py-4 border-t border-stone-100 flex gap-3 justify-end"
+          className="px-5 py-4 border-t border-[#222] flex gap-3 justify-end"
           style={{ paddingBottom: "max(16px, env(safe-area-inset-bottom))" }}
         >
           <button onClick={handleClose} className="btn-ghost">

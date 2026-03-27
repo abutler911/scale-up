@@ -53,39 +53,37 @@ export default function Stats() {
   }, []);
 
   if (loading)
-    return (
-      <div className="page-container text-stone-400 text-sm">Loading...</div>
-    );
+    return <div className="page-container text-[#555] text-sm">Loading...</div>;
 
   return (
     <div className="page-container space-y-4">
-      <h1 className="font-display text-2xl text-stone-900">Stats</h1>
+      <h1 className="font-display text-2xl text-[#f0f0f0]">Stats</h1>
 
       {/* 2x2 on mobile, 4 cols on desktop */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <div className="stat-card">
-          <p className="text-xs text-stone-400 uppercase tracking-wide mb-1">
+          <p className="text-xs text-[#555] uppercase tracking-wide mb-1">
             Total hrs
           </p>
           <p className="text-2xl font-medium">{summary?.totalHours ?? 0}</p>
-          <p className="text-xs text-stone-400">
+          <p className="text-xs text-[#555]">
             {summary?.totalSessions ?? 0} sessions
           </p>
         </div>
         <div className="stat-card">
-          <p className="text-xs text-stone-400 uppercase tracking-wide mb-1">
+          <p className="text-xs text-[#555] uppercase tracking-wide mb-1">
             This month
           </p>
           <p style={{ fontSize: 22, fontWeight: 500, color: "#38BDF8" }}>
             {summary?.thisMonthHours ?? 0}
             <span className="text-sm ml-1">hrs</span>
           </p>
-          <p className="text-xs text-stone-400">
+          <p className="text-xs text-[#555]">
             {summary?.thisMonthSessions ?? 0} sessions
           </p>
         </div>
         <div className="stat-card">
-          <p className="text-xs text-stone-400 uppercase tracking-wide mb-1">
+          <p className="text-xs text-[#555] uppercase tracking-wide mb-1">
             Avg session
           </p>
           <p className="text-2xl font-medium">
@@ -94,21 +92,21 @@ export default function Stats() {
           </p>
         </div>
         <div className="stat-card">
-          <p className="text-xs text-stone-400 uppercase tracking-wide mb-1">
+          <p className="text-xs text-[#555] uppercase tracking-wide mb-1">
             Best streak
           </p>
           <p style={{ fontSize: 22, fontWeight: 500, color: "#38BDF8" }}>
             {streak?.longestStreak ?? 0}
             <span className="text-sm ml-1">days</span>
           </p>
-          <p className="text-xs text-stone-400">
+          <p className="text-xs text-[#555]">
             Now: {streak?.currentStreak ?? 0}
           </p>
         </div>
       </div>
 
       <div className="card">
-        <h3 className="text-sm font-medium text-stone-700 mb-4">
+        <h3 className="text-sm font-medium text-[#b0b0b0] mb-4">
           Weekly practice (last 12 weeks)
         </h3>
         <ResponsiveContainer width="100%" height={160}>
@@ -138,11 +136,11 @@ export default function Stats() {
       {/* Stack on mobile, side by side on desktop */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="card">
-          <h3 className="text-sm font-medium text-stone-700 mb-4">
+          <h3 className="text-sm font-medium text-[#b0b0b0] mb-4">
             Time by practice type
           </h3>
           {byType.length === 0 ? (
-            <p className="text-stone-400 text-sm">No data yet.</p>
+            <p className="text-[#555] text-sm">No data yet.</p>
           ) : (
             <>
               <ResponsiveContainer width="100%" height={160}>
@@ -179,10 +177,10 @@ export default function Stats() {
                       className="w-2.5 h-2.5 rounded-full flex-shrink-0"
                       style={{ background: COLORS[i % COLORS.length] }}
                     />
-                    <span className="text-stone-600 flex-1 capitalize">
+                    <span className="text-[#888] flex-1 capitalize">
                       {t.type.replace("_", " ")}
                     </span>
-                    <span className="text-stone-400">
+                    <span className="text-[#555]">
                       {formatDuration(t.minutes)}
                     </span>
                   </div>
@@ -193,24 +191,24 @@ export default function Stats() {
         </div>
 
         <div className="card">
-          <h3 className="text-sm font-medium text-stone-700 mb-4">
+          <h3 className="text-sm font-medium text-[#b0b0b0] mb-4">
             Time by piece
           </h3>
           {byPiece.length === 0 ? (
-            <p className="text-stone-400 text-sm">No data yet.</p>
+            <p className="text-[#555] text-sm">No data yet.</p>
           ) : (
             <div className="space-y-3">
               {byPiece.slice(0, 6).map((p, i) => (
                 <div key={p.piece_id}>
                   <div className="flex justify-between text-xs mb-1">
-                    <span className="text-stone-700 truncate pr-2">
+                    <span className="text-[#b0b0b0] truncate pr-2">
                       {p.title}
                     </span>
-                    <span className="text-stone-400 flex-shrink-0">
+                    <span className="text-[#555] flex-shrink-0">
                       {formatDuration(p.minutes)}
                     </span>
                   </div>
-                  <div className="h-1.5 bg-stone-100 rounded-full overflow-hidden">
+                  <div className="h-1.5 bg-[#1e1e1e] rounded-full overflow-hidden">
                     <div
                       className="h-full rounded-full transition-all duration-500"
                       style={{
