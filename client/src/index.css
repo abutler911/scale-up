@@ -242,7 +242,7 @@
     padding: 20px 16px 88px;
     max-width: 1024px;
   }
-  @media (min-width: 768px) {
+  @media (min-width: 1024px) {
     .page-container {
       padding: 32px;
       padding-bottom: 32px;

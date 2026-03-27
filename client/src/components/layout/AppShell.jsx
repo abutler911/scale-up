@@ -34,7 +34,7 @@ export default function AppShell() {
           display: "flex",
           flexDirection: "column",
         }}
-        className="hidden md:flex"
+        className="hidden lg:flex"
       >
         <div
           style={{
@@ -125,7 +125,7 @@ export default function AppShell() {
       <main style={{ flex: 1, overflowY: "auto", overflowX: "hidden" }}>
         {/* Mobile topbar */}
         <div
-          className="flex md:hidden items-center justify-between"
+          className="flex lg:hidden items-center justify-between"
           style={{
             position: "sticky",
             top: 0,
@@ -160,7 +160,7 @@ export default function AppShell() {
 
       {/* Bottom nav — mobile only */}
       <nav
-        className="flex md:hidden items-center justify-around"
+        className="flex lg:hidden items-center justify-around"
         style={{
           position: "fixed",
           bottom: 0,
