@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { sessionsApi, statsApi } from "../api/resources.js";
+import { sessionsApi, piecesApi, statsApi } from "../api/resources.js";
 import {
   formatDuration,
   formatDate,
@@ -7,6 +7,7 @@ import {
   PRACTICE_LABELS,
   PRACTICE_TYPES,
 } from "../utils/index.js";
+import SessionDetailModal from "../components/sessions/SessionDetailModal.jsx";
 
 function Heatmap({ data }) {
   const year = new Date().getFullYear();
@@ -30,12 +31,11 @@ function Heatmap({ data }) {
   const colors = ["#f5f5f4", "#FAEEDA", "#FAC775", "#EF9F27", "#BA7517"];
   const weeks = [];
   for (let i = 0; i < cells.length; i += 7) weeks.push(cells.slice(i, i + 7));
-  const cellSize = 11;
   return (
     <div className="overflow-x-auto -mx-1 px-1">
       <div
         className="flex gap-1"
-        style={{ minWidth: `${weeks.length * (cellSize + 4)}px` }}
+        style={{ minWidth: `${weeks.length * 15}px` }}
       >
         {weeks.map((week, wi) => (
           <div key={wi} className="flex flex-col gap-1">
@@ -48,8 +48,8 @@ function Heatmap({ data }) {
                     : ""
                 }
                 style={{
-                  width: cellSize,
-                  height: cellSize,
+                  width: 11,
+                  height: 11,
                   borderRadius: 2,
                   background: date
                     ? colors[getLevel(data[date])]
@@ -77,9 +77,11 @@ function Heatmap({ data }) {
 
 export default function Sessions() {
   const [sessions, setSessions] = useState([]);
+  const [pieces, setPieces] = useState([]);
   const [heatmap, setHeatmap] = useState({});
   const [loading, setLoading] = useState(true);
   const [filterType, setFilterType] = useState("");
+  const [selected, setSelected] = useState(null);
 
   const load = () => {
     Promise.all([
@@ -88,10 +90,12 @@ export default function Sessions() {
         ...(filterType ? { type: filterType } : {}),
       }),
       statsApi.heatmap(new Date().getFullYear()),
+      piecesApi.list(),
     ])
-      .then(([s, h]) => {
+      .then(([s, h, p]) => {
         setSessions(s.data.data || []);
         setHeatmap(h.data.data || {});
+        setPieces(p.data.data || []);
       })
       .finally(() => setLoading(false));
   };
@@ -113,7 +117,14 @@ export default function Sessions() {
 
       <div className="card">
         <div className="flex items-center justify-between mb-4 gap-3">
-          <h3 className="text-sm font-medium text-stone-700">All sessions</h3>
+          <h3 className="text-sm font-medium text-stone-700">
+            All sessions
+            {sessions.length > 0 && (
+              <span className="ml-1.5 text-stone-300 font-normal">
+                {sessions.length}
+              </span>
+            )}
+          </h3>
           <select
             className="input text-sm w-36 flex-shrink-0"
             value={filterType}
@@ -127,6 +138,7 @@ export default function Sessions() {
             ))}
           </select>
         </div>
+
         {loading ? (
           <p className="text-stone-400 text-sm">Loading...</p>
         ) : sessions.length === 0 ? (
@@ -134,7 +146,11 @@ export default function Sessions() {
         ) : (
           <div className="divide-y divide-stone-100">
             {sessions.map((s) => (
-              <div key={s.id} className="py-3 flex items-start gap-3">
+              <button
+                key={s.id}
+                onClick={() => setSelected(s)}
+                className="w-full text-left py-3 flex items-start gap-3 hover:bg-stone-50 active:bg-stone-100 -mx-1 px-1 rounded-xl transition-colors touch-manipulation"
+              >
                 <div className="w-2 h-2 rounded-full bg-amber-400 mt-1.5 flex-shrink-0" />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
@@ -145,7 +161,9 @@ export default function Sessions() {
                       {formatDuration(s.duration_minutes)}
                     </span>
                     {s.overall_feel && (
-                      <span>{FEEL_EMOJI[s.overall_feel]}</span>
+                      <span className="text-sm">
+                        {FEEL_EMOJI[s.overall_feel]}
+                      </span>
                     )}
                     {s.starting_bpm && s.ending_bpm && (
                       <span className="text-xs text-stone-400 bg-stone-50 px-2 py-0.5 rounded-full">
@@ -161,16 +179,35 @@ export default function Sessions() {
                     ))}
                   </div>
                   {s.notes && (
-                    <p className="text-xs text-stone-500 mt-1 line-clamp-2">
+                    <p className="text-xs text-stone-400 mt-1 line-clamp-1">
                       {s.notes}
                     </p>
                   )}
                 </div>
-              </div>
+                <span className="text-stone-300 text-sm flex-shrink-0 mt-0.5">
+                  ›
+                </span>
+              </button>
             ))}
           </div>
         )}
       </div>
+
+      {selected && (
+        <SessionDetailModal
+          session={selected}
+          pieces={pieces}
+          onClose={() => setSelected(null)}
+          onSaved={() => {
+            setSelected(null);
+            load();
+          }}
+          onDeleted={() => {
+            setSelected(null);
+            load();
+          }}
+        />
+      )}
     </div>
   );
 }
